@@ -52,13 +52,34 @@ curl -X POST http://localhost:5000/action \
 # Robot
 The robot works with both Python 2 and 3.
 
+## Server Installation
+
 ```bash
+cd server/
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Run the Application
+## Client Installation
+
 ```bash
-python robot.py
+cd client/
+yarn
 ```
 
+## Run the Application
+
+Open two terminal windows and run these commands in each from the root directory.
+
+```bash
+cd server/
+python3 robot.py
+```
+```bash
+cd client/
+yarn start
+```
+
+The React App is now available at `http://localhost:3000`
 The API is now available at `http://localhost:5000`
