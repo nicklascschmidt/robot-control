@@ -65,7 +65,7 @@ pip install -r requirements.txt
 
 ```bash
 cd client/
-yarn
+yarn || npm i
 ```
 
 ## Run the Application
@@ -78,7 +78,7 @@ python3 robot.py
 ```
 ```bash
 cd client/
-yarn start
+yarn start || npm start
 ```
 
 The React App is now available at `http://localhost:3000`
