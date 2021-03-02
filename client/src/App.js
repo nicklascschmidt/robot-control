@@ -84,14 +84,17 @@ class App extends Component {
     // when POST call fails, robot's state might have changed to FAILED unexpectedly
     // need to re-fetch robot state to check if it failed and incrementFailCount() if so
     this.fetchRobotStateAndUpdateLocalState();
+
+    const { response } = err || {};
+    const { status, data } = response || {};
     
-    if (err.response.status !== 503) {
-      this.setState({ alertMessage: getErrorMessageFromErrorHtmlData(err.response.data) });
+    if (status !== 503) {
+      this.setState({ alertMessage: getErrorMessageFromErrorHtmlData(data) });
     }
 
     // on 503 err, retry the POST call, but limit how many times the call is retried
     // to avoid continuous loop on repeated 503s
-    if (err.response.status === 503) {
+    if (status === 503) {
       if (retryCount < 3) {
         this.setState({ alertMessage: AC.HTTP_503_ERROR_RETRY_MESSAGE });
         this.handlePostRobotActionApiCall(action, true, retryCount + 1)
