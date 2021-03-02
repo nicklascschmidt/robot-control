@@ -11,14 +11,12 @@ const Container = styled.div`
 `;
 
 const Message = styled.div`
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: space-between;
-
-  border: 1px solid black;
-  border-radius: .5em;
+  text-align: center;
   padding: .5em 1em;
+  border-radius: .5em;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.2);
 
+  font-size: small;
   color: white;
   background-color: ${props => props.bgColor};
 `;

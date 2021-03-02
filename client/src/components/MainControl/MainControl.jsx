@@ -8,9 +8,10 @@ const Container = styled.div`
   flex-flow: column nowrap;
   gap: 2em;
   
-  padding: 3em;
+  padding: 2em;
   background-color: white;
-  border: 2px solid black;
+  border-radius: .5em;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.2);
 `;
 
 const MainControl = ({ children }) => {

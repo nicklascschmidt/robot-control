@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 import styled from 'styled-components';
 import CommandHistoryItem, { EmptyItemFiller } from './CommandHistoryItem.jsx';
 
@@ -9,14 +9,18 @@ const StyledTable = styled.table`
   text-align: left;
   background-color: white;
   border-spacing: 0;
-  border-radius: 0.5em;
+  border-radius: .5em;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.2);
   overflow: hidden;
 
   thead {
-    background-color: darkgrey;
+    background-color: var(--color-osaro-blue);
   }
   th, td {
-    padding: 0.2em 0.5em;
+    padding: 0.3em 0.5em;
+  }
+  th {
+    padding: 0.8em 0.5em;
   }
   tbody {
     display: block;
@@ -30,7 +34,7 @@ const StyledTable = styled.table`
   }
 `;
 
-class CommandHistory extends React.Component {
+class CommandHistory extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     if (nextProps.commandHistory.length !== this.props.commandHistory.length) return true;
     return false;

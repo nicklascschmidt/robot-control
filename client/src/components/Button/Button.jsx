@@ -1,4 +1,4 @@
-import React from 'react';
+import { PureComponent } from 'react';
 import styled from 'styled-components';
 
 const StyledButton = styled.button`
@@ -11,13 +11,15 @@ const StyledButton = styled.button`
   `};
 `;
 
-const Button = ({ type, onClick, isDisabled }) => {
-  
-  return (
-    <StyledButton {...{ onClick, isDisabled }}>
-      { type }
-    </StyledButton>
-  );
+class Button extends PureComponent {
+  render() {
+    const { type, onClick, isDisabled } = this.props;
+    return (
+      <StyledButton {...{ onClick, isDisabled }}>
+        { type }
+      </StyledButton>
+    );
+  }
 }
 
 export default Button;

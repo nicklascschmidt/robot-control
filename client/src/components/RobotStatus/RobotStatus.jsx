@@ -8,13 +8,16 @@ const Container = styled.div`
   gap: 1em;
 `;
 
+const Status = styled.div`
+  text-transform: uppercase;
+`;
 
 export default class RobotStatus extends PureComponent {
   render() {
     return (
       <Container>
         <div>Status:</div>
-        <div>{ this.props.robotState || 'error' }</div>
+        <Status>{ this.props.robotState || 'error' }</Status>
       </Container>
     );
   }
