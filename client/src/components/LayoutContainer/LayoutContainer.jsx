@@ -13,7 +13,7 @@ const ContentContainer = styled.div`
   left: 50%;
   transform: translate(-50%, -50%);
 
-  height: 70vh;
+  height: 78vh;
   min-width: 80vw;
 
   @media (min-width: 320px) {

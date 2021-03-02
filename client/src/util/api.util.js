@@ -16,7 +16,6 @@ export const postRobotActionToApi = (action) => {
  * @example - `&quot;` --> `"`
  */
 function htmlDecode(input) {
-  console.log('input', input);
   var doc = new DOMParser().parseFromString(input, "text/html");
   return doc.documentElement.textContent;
 }
