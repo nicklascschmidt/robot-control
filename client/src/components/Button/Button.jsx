@@ -3,20 +3,18 @@ import styled from 'styled-components';
 
 const StyledButton = styled.button`
   padding: .5em 1em;
+  text-transform: capitalize;
+
+  ${props => props.isDisabled && `
+    pointer-events: none;
+    opacity: 0.4;
+  `};
 `;
 
-const buttonData = {
-  start: {},
-  repair: {},
-  place: {},
-  done: {},
-  reset: {},
-}
-
-const Button = ({ type, onClick }) => {
+const Button = ({ type, onClick, isDisabled }) => {
   
   return (
-    <StyledButton {...{ onClick }}>
+    <StyledButton {...{ onClick, isDisabled }}>
       { type }
     </StyledButton>
   );
