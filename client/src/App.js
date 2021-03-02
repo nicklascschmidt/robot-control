@@ -15,6 +15,13 @@ import * as RSC from './constants/robotStateConstants';
 import * as AC from './constants/alertConstants';
 
 
+/**
+ * @summary - GET robot state on mount
+ *          - POST action on button click
+ *          - Update status from POST resp, re-GET status on server fail
+ *          - Retry POST req on 503 error
+ *          - loading handled by incr/decr loadingStack at the start/end of each call
+ */
 class App extends Component {
   constructor(props) {
     super(props);
@@ -22,7 +29,7 @@ class App extends Component {
       loadingStack: 0,
       alertMessage: '',
       robotState: '',
-      failedCount: 0,
+      failCount: 0,
       commandHistory: [],
     };
   }
@@ -31,8 +38,11 @@ class App extends Component {
     this.fetchRobotStateAndUpdateLocalState();
   }
 
+  /**
+   * @summary - fetch robot state and pass to RobotStatus
+   *          - incr failCount if robot fails
+   */
   fetchRobotStateAndUpdateLocalState = async () => {
-    console.log('fetching robot state');
     this.startLoading();
 
     await getRobotStateFromApi()
@@ -40,17 +50,62 @@ class App extends Component {
         this.setState({ robotState });
         if (robotState === RSC.FAILED) this.incrementFailCount();
       })
-      .catch((err) => console.error(err))
+      .catch(() => this.setState({ alertMessage: AC.HTTP_GENERIC_ERROR }))
       .finally(this.clearLoading);
-  };
+  }
 
-  handlePostRobotActionApiCall = async (action, isRetry, retryCount = 0) => {
-    console.log('posting robot action', action);
+  /**
+   * @summary - post robot action to server on Button click
+   *          - log each command to display in CommandHistory
+   *          - retry the call on 503 error (limit to 2 retries to avoid spamming server)
+   */
+  handlePostRobotActionApiCall = async (action, isRetry = false, retryCount = 0) => {
     this.startLoading();
 
     // delay the API call if retrying after hitting 503 error
     if (isRetry) await new Promise(resolve => setTimeout(resolve, 1500))
 
+    this.logActionToCommandHistory(action, isRetry);
+
+    await postRobotActionToApi(action)
+      .then(({ data }) => this.handlePostRobotActionSuccess(data))
+      .catch((err) => this.handlePostRobotActionFail(err, action, retryCount))
+      .finally(this.clearLoading);
+  }
+
+  handlePostRobotActionSuccess = (respData) => {
+    const robotState = respData.state;
+    this.setState({ robotState });
+    if (robotState === RSC.FAILED) this.incrementFailCount();
+    this.clearAlertMessage();
+  }
+
+  handlePostRobotActionFail = (err, action, retryCount) => {
+    // when POST call fails, robot's state might have changed to FAILED unexpectedly
+    // need to re-fetch robot state to check if it failed and incrementFailCount() if so
+    this.fetchRobotStateAndUpdateLocalState();
+    
+    if (err.response.status !== 503) {
+      this.setState({ alertMessage: getErrorMessageFromErrorHtmlData(err.response.data) });
+    }
+
+    // on 503 err, retry the POST call, but limit how many times the call is retried
+    // to avoid continuous loop on repeated 503s
+    if (err.response.status === 503) {
+      if (retryCount < 3) {
+        this.setState({ alertMessage: AC.HTTP_503_ERROR_RETRY_MESSAGE });
+        this.handlePostRobotActionApiCall(action, true, retryCount + 1)
+      } else {
+        this.setState({ alertMessage: AC.HTTP_503_ERROR });
+      }
+    }
+  }
+
+  /**
+   * @summary - prepends new actions to state.commandHistory
+   *          - adds `(Retry)` to the action if 503 retry
+   */
+  logActionToCommandHistory = (action, isRetry) => {
     this.setState(prevState => {
       const newCommand = {
         action: `${action}${isRetry ? ' (Retry)' : ''}`,
@@ -58,48 +113,14 @@ class App extends Component {
       }
       const commandHistory = [newCommand, ...prevState.commandHistory];
       return { commandHistory };
-    })
-
-    await postRobotActionToApi(action)
-      .then((resp) => {
-        const robotState = resp.data.state;
-        this.setState({ robotState });
-
-        if (robotState === RSC.FAILED) this.incrementFailCount();
-
-        this.clearAlertMessage();
-      })
-      .catch((err) => {
-        console.error(err);
-
-        // when POST call fails, robot's state might have changed to FAILED unexpectedly
-        // need to re-fetch robot state to check if it failed and incrementFailCount() if so
-        this.fetchRobotStateAndUpdateLocalState();
-        
-        if (err.response.status !== 503) {
-          this.setState({
-            alertMessage: getErrorMessageFromErrorHtmlData(err.response.data),
-          });
-        }
-
-        // on 503 err, retry the POST call, but limit how many times the call is retried to avoid continuous loop on repeated 503s
-        if (err.response.status === 503) {
-          if (retryCount < 3) {
-            this.setState({ alertMessage: AC.HTTP_503_ERROR_RETRY_MESSAGE });
-            this.handlePostRobotActionApiCall(action, true, retryCount + 1)
-          } else {
-            this.setState({ alertMessage: AC.HTTP_503_ERROR });
-          }
-        }
-      })
-      .finally(this.clearLoading);
-  };
+    });
+  }
 
   incrementFailCount = () => {
     this.setState((prevState) => ({
-      failedCount: prevState.failedCount + 1,
+      failCount: prevState.failCount + 1,
     }));
-  };
+  }
 
   startLoading = () => this.setState(prevState => ({ loadingStack: prevState.loadingStack + 1 }))
   clearLoading = () => this.setState(prevState => ({ loadingStack: prevState.loadingStack - 1 }))
@@ -110,7 +131,7 @@ class App extends Component {
     const {
       loadingStack,
       robotState,
-      failedCount,
+      failCount,
       alertMessage,
       commandHistory,
     } = this.state;
@@ -119,16 +140,16 @@ class App extends Component {
 
     return (
       <LayoutContainer>
-        <AlertMessage {...{ failedCount, alertMessage }} />
+        <AlertMessage {...{ failCount, alertMessage }} />
         <MainControl>
           <LoadingSpinner {...{ isLoading }} />
-          <RobotStatus robotState={robotState} />
+          <RobotStatus {...{ robotState }} />
           <ButtonsDisplay
             {...{ isLoading, robotState }}
             handlePostRobotActionApiCall={this.handlePostRobotActionApiCall}
           />
         </MainControl>
-        <CommandHistory commandHistory={commandHistory} />
+        <CommandHistory {...{ commandHistory }} />
       </LayoutContainer>
     );
   }
