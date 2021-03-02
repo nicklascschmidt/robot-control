@@ -1,20 +1,63 @@
 import React from 'react';
 import styled from 'styled-components';
+import CommandHistoryItem, { EmptyItemFiller } from './CommandHistoryItem.jsx';
 
-const Container = styled.div`
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: space-between;
+const Container = styled.div``;
 
-  border: 2px solid black;
+const StyledTable = styled.table`
+  width: 100%;
+  text-align: left;
+  background-color: white;
+  border-spacing: 0;
+  border-radius: 0.5em;
+  overflow: hidden;
+
+  thead {
+    background-color: darkgrey;
+  }
+  th, td {
+    padding: 0.2em 0.5em;
+  }
+  tbody {
+    display: block;
+    height: 16em;
+    overflow: auto;
+  }
+  thead, tbody tr, tfoot {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
 `;
 
-const CommandHistory = (props) => {
-  return (
-    <Container {...props}>
-      {'an action was taken'}
-    </Container>
-  );
+class CommandHistory extends React.Component {
+  shouldComponentUpdate(nextProps, nextState) {
+    if (nextProps.commandHistory.length !== this.props.commandHistory.length) return true;
+    return false;
+  }
+
+  render() {
+    const { commandHistory } = this.props;
+    return (
+      <Container className='command-history'>
+        <StyledTable>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {commandHistory.length === 0 
+              ? <EmptyItemFiller />
+              : commandHistory.map((command, idx) => (
+                <CommandHistoryItem key={`${command.timestamp}-${idx}`} {...command} />
+              ))}
+          </tbody>
+        </StyledTable>
+      </Container>
+    );
+  }
 }
 
 export default CommandHistory;
