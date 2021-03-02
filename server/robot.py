@@ -6,6 +6,9 @@ from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
+# Flask version issue, need to include the below line to run
+# Source: https://github.com/pallets/flask/issues/2549
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 CORS(app)
 
 
