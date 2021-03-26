@@ -1,13 +1,11 @@
 import axios from 'axios';
 
-export const baseServerUrl = 'http://localhost:5000';
-
 export const getRobotStateFromApi = () => {
-  return axios.get(`${baseServerUrl}/state`);
+  return axios.get(`/state`);
 }
 
 export const postRobotActionToApi = (action) => {
-  return axios.post(`${baseServerUrl}/action`, { action });
+  return axios.post(`/action`, { action });
 }
 
 /**
