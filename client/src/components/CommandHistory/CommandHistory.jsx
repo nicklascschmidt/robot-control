@@ -14,7 +14,7 @@ const StyledTable = styled.table`
   overflow: hidden;
 
   thead {
-    background-color: var(--color-osaro-blue);
+    background-color: var(--color-brand-blue);
   }
   th, td {
     padding: 0.3em 0.5em;

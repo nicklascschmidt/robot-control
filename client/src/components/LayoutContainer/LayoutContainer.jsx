@@ -46,7 +46,7 @@ const StyledHeader = styled.header`
 const LayoutContainer = ({ children }) => {
   return (
     <ContentContainer>
-      <StyledHeader>OSARO Robot Control</StyledHeader>
+      <StyledHeader>Robot Control</StyledHeader>
       { children }
     </ContentContainer>
   );

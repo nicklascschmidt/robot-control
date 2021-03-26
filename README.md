@@ -1,4 +1,4 @@
-# OSARO Frontend Challenge
+# Robot Control - Frontend Challenge
 In this challenge you will design a single-page JS app in which a user
 can control a simple robot that picks and places objects. Below are
 instructions to install and run the robot code. You can communicate with
